@@ -45,7 +45,21 @@ class PushNotificationService {
   async registerServiceWorker() {
     if ('serviceWorker' in navigator) {
       try {
-        const registration = await navigator.serviceWorker.register('/service-worker.js');
+        // Ensure the service worker is registered from the root path
+        const registration = await navigator.serviceWorker.register('/service-worker.js', {
+          scope: '/'
+        });
+        
+        // Wait for the service worker to be active
+        if (registration.installing) {
+          await new Promise(resolve => {
+            registration.installing.addEventListener('statechange', (e) => {
+              if (e.target.state === 'activated') {
+                resolve();
+              }
+            });
+          });
+        }
         
         // Send configuration to service worker
         if (registration.active) {

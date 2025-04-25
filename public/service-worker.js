@@ -64,10 +64,17 @@ self.addEventListener('notificationclick', function(event) {
   }
 });
 
-self.addEventListener('install', () => {
-  self.skipWaiting();
+// Force the service worker to become active immediately
+self.addEventListener('install', (event) => {
+  event.waitUntil(self.skipWaiting());
 });
 
+// Take control of all clients as soon as the service worker is activated
 self.addEventListener('activate', (event) => {
-  event.waitUntil(self.clients.claim());
+  event.waitUntil(
+    Promise.all([
+      self.clients.claim(),
+      self.skipWaiting()
+    ])
+  );
 }); 
