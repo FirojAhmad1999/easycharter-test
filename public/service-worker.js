@@ -18,7 +18,17 @@ self.addEventListener('message', (event) => {
 
 self.addEventListener('push', function(event) {
   if (event.data) {
-    const data = event.data.json();
+    let data;
+    try {
+      data = event.data.json();
+    } catch (e) {
+      // If JSON parsing fails, treat it as plain text
+      data = {
+        title: 'New Notification',
+        body: event.data.text()
+      };
+    }
+
     const options = {
       body: data.body,
       icon: config.notificationIcon,
@@ -29,10 +39,9 @@ self.addEventListener('push', function(event) {
       },
       actions: data.actions || [],
       vibrate: [200, 100, 200],
-      tag: 'charter-notification', // For grouping notifications
-      renotify: true, // Allow new notifications even if one exists
-      requireInteraction: true, // Keep notification visible until user interacts
-      // Add branding to notification
+      tag: 'charter-notification',
+      renotify: true,
+      requireInteraction: true,
       silent: false,
       timestamp: new Date().getTime()
     };
